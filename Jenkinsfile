@@ -1,15 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "sus-app"
-        CONTAINER_NAME = "sus-container"
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
-                echo 'Code already checked from GitHub'
+                echo 'Checking source code'
             }
         }
 
@@ -19,38 +14,23 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Report') {
             steps {
-                bat 'docker build -t %IMAGE_NAME% .'
-            }
-        }
-
-        stage('Remove Old Container') {
-            steps {
-                bat 'docker stop %CONTAINER_NAME% || echo Not running'
-                bat 'docker rm %CONTAINER_NAME% || echo Not exists'
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                bat 'docker run -d -p 8080:80 --name %CONTAINER_NAME% %IMAGE_NAME%'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'echo SUS pipeline test success'
+                bat 'echo Build successful > build-log.txt'
+                bat 'type build-log.txt'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline SUCCESS'
+            echo 'Pipeline completed successfully'
         }
         failure {
-            echo 'Pipeline FAILED'
+            echo 'Pipeline failed'
+        }
+        always {
+            archiveArtifacts artifacts: '*.txt', fingerprint: true
         }
     }
 }
